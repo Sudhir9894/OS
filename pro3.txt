@@ -1,0 +1,23 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+int main() {
+ pid_t pid;
+ pid = fork();
+if (pid < 0) { // Error handling
+ fprintf(stderr, "Fork failed\n");
+ exit(1);
+ }
+ else if (pid == 0) { // Child process
+ printf("I am the child process, pid=%d\n", getpid());
+ execlp("/bin/ls", "ls", NULL);
+ }
+ else { // Parent process
+ printf("I am the parent process, pid=%d\n", getpid());
+ wait(NULL);
+ printf("Child process has completed\n");
+ }
+ printf("Exiting program\n");
+ exit(0);
+}

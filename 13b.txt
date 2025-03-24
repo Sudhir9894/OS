@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <stdlib.h>
+typedef struct student {
+ int rollNo;
+ char name[30];
+ int marks;
+} Student;
+int main() {
+ FILE *fp;
+ Student s;
+ int i, n;
+ char filename[20];
+ printf("Enter the number of students: ");
+ scanf("%d", &n);
+ // create a new file for writing
+ printf("Enter the file name: ");
+
+ scanf("%s", filename);
+ fp = fopen(filename, "wb");
+ // write data to the file
+ for (i = 0; i < n; i++) {
+ printf("\nEnter roll number: ");
+ scanf("%d", &s.rollNo);
+ printf("Enter name: ");
+ scanf("%s", s.name);
+ printf("Enter marks: ");
+ scanf("%d", &s.marks);
+ fwrite(&s, sizeof(Student), 1, fp);
+ }
+ fclose(fp);
+ // open the file for reading
+ fp = fopen(filename, "rb");
+ // search for a student record
+ int rollNo, found = 0;
+ printf("\nEnter the roll number to search: ");
+ scanf("%d", &rollNo);
+ while (fread(&s, sizeof(Student), 1, fp)) {
+ if (s.rollNo == rollNo) {
+ found = 1;
+ printf("\nStudent details:\n");
+ printf("Roll number: %d\n", s.rollNo);
+ printf("Name: %s\n", s.name);
+ printf("Marks: %d\n", s.marks);
+ break;
+ }
+ }
+ if (!found) {
+ printf("\nStudent not found.\n");
+ }
+ fclose(fp);
+ return 0;
+} 

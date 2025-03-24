@@ -1,0 +1,55 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define BLOCK_SIZE 512
+int main()
+{
+ int num_blocks, num_files, i, j, file_size;
+ char buffer[BLOCK_SIZE];
+ FILE *fp;
+ printf("Enter the number of blocks in the disk: ");
+ scanf("%d", &num_blocks);
+ // initialize the disk with all zeroes
+ fp = fopen("disk.bin", "wb");
+ for (i = 0; i < num_blocks; i++) {
+ fwrite(buffer, BLOCK_SIZE, 1, fp);
+ }
+ fclose(fp);
+
+ // prompt user for number of files
+ printf("Enter the number of files: ");
+ scanf("%d", &num_files);
+ // create files on disk
+ for (i = 1; i <= num_files; i++) {
+ printf("Enter the size of file %d: ", i);
+ scanf("%d", &file_size);
+ // check if there is enough space on disk to write file
+ fp = fopen("disk.bin", "rb+");
+ int block_num = 0;
+ while (fread(buffer, BLOCK_SIZE, 1, fp)) {
+ int free_space = 0;
+ for (j = 0; j < BLOCK_SIZE; j++) {
+ if (buffer[j] == 0) {
+ free_space++;
+ if (free_space == file_size) {
+ break;
+ }
+ } else {
+ free_space = 0;
+ }
+ }
+ if (free_space == file_size) {
+ // write file to disk
+ fseek(fp, block_num * BLOCK_SIZE + j - free_space + 1, SEEK_SET);
+ for (j = 0; j < file_size; j++) {
+ buffer[block_num * BLOCK_SIZE + j] = 1;
+ }
+ fwrite(buffer, BLOCK_SIZE, 1, fp);
+ printf("File %d written to disk at block %d\n", i, block_num);
+ break;
+ }
+ block_num++;
+ }
+ fclose(fp);
+ }
+ return 0;
+} 

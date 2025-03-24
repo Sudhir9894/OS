@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define BLOCK_SIZE 512
+#define MAX_BLOCKS 100
+typedef struct {
+ int blockNumber;
+ int fileSize;
+} Index;
+void createFile(char *filename, int *file, int fileSize) {
+ FILE *fp = fopen(filename, "wb");
+ int numBlocks = (fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE;
+ fwrite(file, sizeof(int), fileSize, fp);
+ for (int i = fileSize; i < numBlocks * BLOCK_SIZE; i++) {
+ fputc(0, fp);
+ }
+ fclose(fp);
+}
+
+void indexFile(char *filename, char *indexFilename, int fileSize) {
+ FILE *fp = fopen(filename, "rb");
+ FILE *ip = fopen(indexFilename, "wb");
+ int numBlocks = (fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE;
+ Index index[numBlocks];
+ for (int i = 0; i < numBlocks; i++) {
+ index[i].blockNumber = i + 1;
+ if (i == numBlocks - 1) {
+ index[i].fileSize = fileSize - i * BLOCK_SIZE;
+ } else {
+ index[i].fileSize = BLOCK_SIZE;
+ }
+ fwrite(&index[i], sizeof(Index), 1, ip);
+ }
+ fclose(fp);
+ fclose(ip);
+}
+void readFile(char *filename, char *indexFilename) {
+ FILE *fp = fopen(filename, "rb");
+ FILE *ip = fopen(indexFilename, "rb");
+ Index index[MAX_BLOCKS];
+ int i = 0;
+ while (fread(&index[i], sizeof(Index), 1, ip)) {
+ if (index[i].blockNumber != -1) {
+ fseek(fp, (index[i].blockNumber - 1) * BLOCK_SIZE, SEEK_SET);
+ for (int j = 0; j < index[i].fileSize; j++) {
+ printf("%c", fgetc(fp));
+ }
+ }
+ i++;
+ }
+ fclose(fp);
+ fclose(ip);
+}
+int main() {
+ char filename[20], indexFilename[20];
+ int fileSize, file[MAX_BLOCKS];
+ printf("Enter file name: ");
+ scanf("%s", filename);
+
+ printf("Enter file size: ");
+ scanf("%d", &fileSize);
+ printf("Enter file contents: ");
+ for (int i = 0; i < fileSize; i++) {
+ scanf("%d", &file[i]);
+ }
+ createFile(filename, file, fileSize);
+ indexFile(filename, indexFilename, fileSize);
+ readFile(filename, indexFilename);
+ return 0;
+} 

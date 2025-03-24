@@ -1,0 +1,46 @@
+#include <stdio.h>
+#define MAX_FRAMES 3
+#define MAX_REFERENCES 20
+int frames[MAX_FRAMES];
+int head = 0;
+int faultCount = 0;
+void initFrames() {
+ for (int i = 0; i < MAX_FRAMES; i++) {
+ frames[i] = -1;
+ }
+}
+
+int findPage(int page) {
+ for (int i = 0; i < MAX_FRAMES; i++) {
+ if (frames[i] == page) {
+ return i;
+ }
+ }
+ return -1;
+}
+void displayFrames() {
+ for (int i = 0; i < MAX_FRAMES; i++) {
+ printf("%d ", frames[i]);
+ }
+ printf("\n");
+}
+void fifo(int references[], int n) {
+ initFrames();
+ for (int i = 0; i < n; i++) {
+ int page = references[i];
+ int index = findPage(page);
+ if (index == -1) {
+ frames[head] = page;
+ head = (head + 1) % MAX_FRAMES;
+ faultCount++;
+ }
+ displayFrames();
+ }
+ printf("FIFO Fault Count: %d\n", faultCount);
+}
+int main() {
+ int references[MAX_REFERENCES] = {0, 1, 2, 3, 0, 1, 4, 0, 1, 2, 3, 4, 2, 3, 0, 3, 2, 1, 2, 0};
+ int n = 20;
+ fifo(references, n);
+ return 0;
+}

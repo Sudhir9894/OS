@@ -1,0 +1,71 @@
+#include <stdio.h>
+#define MAX_MEMORY 10000
+#define FREE 0
+#define ALLOCATED 1
+int memory[MAX_MEMORY];
+int memoryStatus[MAX_MEMORY];
+void initMemory() {
+ for(int i = 0; i < MAX_MEMORY; i++) {
+ memory[i] = 0;
+ memoryStatus[i] = FREE;
+ }
+}
+
+void displayMemory() {
+ printf("Memory:\n");
+ for(int i = 0; i < MAX_MEMORY; i++) {
+ if(memoryStatus[i] == ALLOCATED) {
+ printf("%d ", memory[i]);
+ }
+ else {
+ printf("- ");
+ }
+ }
+ printf("\n");
+}
+void *bestFit(int size) {
+ int startIndex = -1;
+ int count = 0;
+ int minCount = MAX_MEMORY + 1;
+ for(int i = 0; i < MAX_MEMORY; i++) {
+ if(memoryStatus[i] == FREE) {
+ if(count == 0) {
+ startIndex = i;
+ }
+ count++;
+ }
+ else {
+ if(count >= size && count < minCount) {
+ startIndex = i - count;
+ minCount = count;
+ }
+ count = 0;
+ }
+ }
+ if(count >= size && count < minCount) {
+ startIndex = MAX_MEMORY - count;
+ minCount = count;
+ }
+ if(minCount >= size) {
+ for(int j = startIndex; j < startIndex + size; j++) {
+ memoryStatus[j] = ALLOCATED;
+ }
+ return &memory[startIndex];
+ }
+
+ return NULL;
+}
+int main() {
+ initMemory();
+ displayMemory();
+ int *p1 = (int*)bestFit(10);
+ if(p1 != NULL) {
+ *p1 = 10;
+ }
+ int *p2 = (int*)bestFit(20);
+ if(p2 != NULL) {
+ *p2 = 20;
+ }
+ displayMemory();
+ return 0;
+} 
